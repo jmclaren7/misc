@@ -13,8 +13,8 @@ if %errorLevel% == 0 (
 	pause
 	exit
 
-    ) else (
+) else (
         echo Failure: Current permissions inadequate.
 	pause
 	exit
-    )
+)
