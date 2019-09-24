@@ -1,7 +1,10 @@
 @echo off
 
-set /p host=host Address: 
+set /p host=Host: 
 set logfile=ping_log_%host%.log
+
+echo %date% %time: Continuous ping running, only showing timeouts to %host%
+echo %date% %time: Continuous ping running, only showing timeouts to %host%>>%logfile%
 
 :Ping
 
