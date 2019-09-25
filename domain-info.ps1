@@ -15,9 +15,9 @@ Write-Host "====================================================================
 Write-Host "Computers.........."$Computers
 Write-Host "    Inactive (90).."$ComputersInactive
 Write-Host "    Workstations..."$ComputersWorkstations
-Write-Host "    Servers........"$ComputersServers 
-Write-Host "Users Enabled......"$UsersEnabled 
-Write-Host "    Active (90)...."$UsersActive  
+Write-Host "    Servers........"$ComputersServers
+Write-Host "Users Enabled......"$UsersEnabled
+Write-Host "    Active (90)...."$UsersActive
 Write-Host "    Inactive (90).."$UsersInactive
 Write-Host "Users Disabled....."$UsersDisabled
 Write-Host " "
