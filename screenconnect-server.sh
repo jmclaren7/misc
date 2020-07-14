@@ -2,8 +2,8 @@ yum update
 yum install epel-release
 yum install wget htop mlocate
 
-wget https://d1kuyuqowve5id.cloudfront.net/ScreenConnect_19.0.23665.7058_Release.tar.gz
-tar -xzf ScreenConnect_19.0.23665.7058_Release.tar.gz
+wget https://www.screenconnect.com/Download?Action=DownloadLatest&Platform=Linux&PreRelease=false
+tar -xzf ScreenConnect_*.tar.gz
 chmod +x sc-install.sh 
 ./sc-install.sh 
 systemctl enable screenconnect
