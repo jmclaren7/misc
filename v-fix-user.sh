@@ -26,7 +26,7 @@ done
 echo "Updating Web Template"
 for fullfile in /home/$USER/web/*; do
     WEB=$(basename -- "$fullfile")
-    v-change-web-domain-tpl $USER $WEB hosting
+    v-change-web-domain-tpl $USER $WEB default
 done
 
 echo "Updating Name Servers"
