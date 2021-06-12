@@ -11,7 +11,7 @@ $CONFIG = '{"lang":"en","error_reporting":false,"show_hidden":false,"hide_Cols":
 define('VERSION', '2.4.6');
 
 //Application Title
-define('APP_TITLE', $_SERVER['HTTP_HOST'].' File Manager');
+define('APP_TITLE', gethostname().' File Manager');
 
 // --- EDIT BELOW CONFIGURATION CAREFULLY ---
 
