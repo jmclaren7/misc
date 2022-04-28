@@ -17,8 +17,10 @@ $pin_taskbar_apps =
 $pttb = "c:\pttb.exe"
 
 Foreach ($thisapp in $pin_taskbar_apps){
-    $Desc = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($thisapp).FileDescription
-    If(-Not (Test-Path -Path $env:APPDATA"\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\$Desc.lnk" -PathType Leaf)){
-        .$pttb $thisapp
+    If(Test-Path -Path $thisapp -PathType Leaf){
+        $Desc = [System.Diagnostics.FileVersionInfo]::GetVersionInfo($thisapp).FileDescription
+        If(-Not (Test-Path -Path $env:APPDATA"\Microsoft\Internet Explorer\Quick Launch\User Pinned\TaskBar\$Desc.lnk" -PathType Leaf)){
+            .$pttb $thisapp
+        }
     }
  }
