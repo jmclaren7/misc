@@ -27,7 +27,7 @@ $apps = @(
     "Microsoft.Getstarted"
     "Microsoft.GetHelp"
 
-    "Microsoft.WindowsStore"
+    #"Microsoft.WindowsStore"
 
     "Microsoft.Xbox.TCUI"
     "Microsoft.XboxApp"
