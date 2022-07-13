@@ -10,7 +10,7 @@ echo 4.
 echo 5. 
 echo 6. [MMC]
 echo 7. [Presets]
-echo 8. [Scripts]
+echo 8. [Misc]
 echo 9. 
 
 
@@ -113,7 +113,7 @@ cls
 echo 1. VMHosts Preset
 echo 2. RSupport Preset
 echo 3. Veeam Preset
-echo 4. 
+echo 4. Other Servers Preset
 echo 5. 
 echo 6. 
 echo 7. 
@@ -125,24 +125,27 @@ choice /C 123456789 /N /M "Select an option: "
 goto presets%errorlevel%
 
 :presets1
-Call :BackgroundRed
+Call :SetBackground Red
 Call :HideSearch
 Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel. Only use this machine for Hyper-V server managment, not to be used for any other purpose."
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1
 exit
 
 :presets2
-Call :BackgroundGray
+Call :SetBackground Gray
 Call :HideSearch
 exit
 
 :presets3
-Call :BackgroundGreen
+Call :SetBackground Green
 Call :HideSearch
-:AddLoginMessage Warning!, "This system is only for use by authorized personnel. Only use this machine for backup managment."
+Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel. Only use this machine for backup managment."
 exit
 
 :presets4
+Call :SetBackground Orange
+Call :HideSearch
+Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel."
 exit
 
 :presets5
@@ -169,7 +172,7 @@ echo 2. Set Last Logged On User
 echo 3. Dell Command Update
 echo 4. Umbrella No Internet Fix
 echo 5. Set Target Version To Windows 10 21H2
-echo 6. 
+echo 6. Restart Explorer With UAC Bypass
 echo 7. 
 echo 8. 
 echo 9. [Main Menu]
@@ -190,11 +193,18 @@ reg delete HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI
 reg delete HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnDisplayName /f
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnUser /d %id% /f
 reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnSAMUser /d %id% /f
+echo.
+echo Kill WinLogon.exe to refresh logon screen? Don't run this within a logon session!
+choice /C yn /N /M "y/n: "
+goto killwinlogon-%errorlevel%
+:killwinlogon-1
+taskkill /f /t /im winlogon.exe
+:killwinlogon-2
 exit
 
 :scripts3
-REM PowerShell.exe -Command "wget 'https://dl.dell.com/FOLDER07820512M/1/Dell-Command-Update-Application_8DGG4_WIN_4.4.0_A00.EXE' -outfile 'dell-cu.exe';saps 'dell-cu.exe'"
-start https://dl.dell.com/FOLDER07820512M/1/Dell-Command-Update-Application_8DGG4_WIN_4.4.0_A00.EXE
+REM PowerShell.exe -Command "wget 'https://dl.dell.com/FOLDER08334841M/4/Dell-Command-Update-Application_W4HP2_WIN_4.5.0_A00_02.EXE' -outfile 'dell-cu.exe';saps 'dell-cu.exe'"
+start https://dl.dell.com/FOLDER08334841M/4/Dell-Command-Update-Application_W4HP2_WIN_4.5.0_A00_02.EXE
 exit
 
 :scripts4
@@ -209,6 +219,9 @@ reg add HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /v 
 exit
 
 :scripts6
+Call :Admin
+taskkill /f /im explorer.exe
+start c:\windows\explorer.exe /nouaccheck
 exit
 
 :scripts7
@@ -233,29 +246,37 @@ reg add "HKEY_CURRENT_USER\SOFTWARE\Microsoft\Windows\CurrentVersion\Search" /v 
 taskkill /F /IM explorer.exe & start explorer
 exit /B 0
 
-:BackgroundGreen
->backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 36 B3 00 00
-goto SetBackground
-
-:BackgroundBlue
->backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 FF 8C 00 00
-goto SetBackground
-
-:BackgroundOrange
->backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 00 8C FF 00
-goto SetBackground
-
-:BackgroundRed
->backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 38 34 D1 00
-goto SetBackground
-
-:BackgroundGray
->backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 7F 7F 7F 00
-goto SetBackground
-
 :SetBackground
-certutil -f -decodehex backgroundpixel.tmp %UserProfile%\Pictures\backgroundpixel.bmp >nul
+SET BR=%~1
+SET BG=%~2
+SET BB=%~3
+IF "%~1"=="Red"    (SET BR=D1 & SET BG=34 & SET BB=38)
+IF "%~1"=="Green"  (SET BR=00 & SET BG=B3 & SET BB=36)
+IF "%~1"=="Blue"   (SET BR=00 & SET BG=8C & SET BB=FF)
+IF "%~1"=="Orange" (SET BR=FF & SET BG=8C & SET BB=00)
+IF "%~1"=="Blue"   (SET BR=22 & SET BG=33 & SET BB=44)
+IF "%~1"=="Purple" (SET BR=22 & SET BG=33 & SET BB=44)
+IF "%~1"=="Gray"   (SET BR=7F & SET BG=7F & SET BB=7F)
+set BGPath=%ProgramData%\RTScripts
+set BGFullPath=%BGPath%\backgroundpixel.bmp
+mkdir %BGPath%
+>backgroundpixel.tmp echo(42 4D 3A 00 00 00 00 00 00 00 36 00 00 00 28 00 00 00 01 00 00 00 01 00 00 00 01 00 18 00 00 00 00 00 00 00 00 00 12 0B 00 00 12 0B 00 00 00 00 00 00 00 00 00 00 %BB% %BG% %BR% 00
+certutil -f -decodehex backgroundpixel.tmp %BGFullPath% >nul
 del backgroundpixel.tmp
-Powershell -NoLogo -NonInteractive -NoProfile -ExecutionPolicy Bypass -Encoded WwBTAHkAcwB0AGUAbQAuAFQAZQB4AHQALgBFAG4AYwBvAGQAaQBuAGcAXQA6ADoAVQBUAEYAOAAuAEcAZQB0AFMAdAByAGkAbgBnACgAWwBTAHkAcwB0AGUAbQAuAEMAbwBuAHYAZQByAHQAXQA6ADoARgByAG8AbQBCAGEAcwBlADYANABTAHQAcgBpAG4AZwAoACgAJwB7ACIAUwBjAHIAaQBwAHQAIgA6ACIASgBHAE4AdgBaAEcAVQBnAFAAUwBCAEEASgB3ADAASwBkAFgATgBwAGIAbQBjAGcAVQAzAGwAegBkAEcAVgB0AEwAbABKADEAYgBuAFIAcABiAFcAVQB1AFMAVwA1ADAAWgBYAEoAdgBjAEYATgBsAGMAbgBaAHAAWQAyAFYAegBPAHcAMABLAGIAbQBGAHQAWgBYAE4AdwBZAFcATgBsAEkARgBkAHAAYgBqAE0AeQBlAHcAMABLAEkAQwBBAGcASQBIAEIAMQBZAG0AeABwAFkAeQBCAGoAYgBHAEYAegBjAHkAQgBYAFkAVwB4AHMAYwBHAEYAdwBaAFgASgA3AEQAUQBvAGcASQBDAEEAZwBJAEMAQgBiAFIARwB4AHMAUwBXADEAdwBiADMASgAwAEsAQwBKADEAYwAyAFYAeQBNAHoASQB1AFoARwB4AHMASQBpAHcAZwBRADIAaABoAGMAbABOAGwAZABEADEARABhAEcARgB5AFUAMgBWADAATABrAEYAMQBkAEcAOABwAFgAUQAwAEsASQBDAEEAZwBJAEMAQQBnAGMAMwBSAGgAZABHAGwAagBJAEMAQgBsAGUASABSAGwAYwBtADQAZwBhAFcANQAwAEkARgBOADUAYwAzAFIAbABiAFYAQgBoAGMAbQBGAHQAWgBYAFIAbABjAG4ATgBKAGIAbQBaAHYASQBDAGgAcABiAG4AUQBnAGQAVQBGAGoAZABHAGwAdgBiAGkAQQBzAEkARwBsAHUAZABDAEIAMQBVAEcARgB5AFkAVwAwAGcATABDAEIAegBkAEgASgBwAGIAbQBjAGcAYgBIAEIAMgBVAEcARgB5AFkAVwAwAGcATABDAEIAcABiAG4AUQBnAFoAbgBWAFgAYQBXADUASgBiAG0AawBwAEkARABzAE4AQwBpAEEAZwBJAEMAQQBnAEkASABCADEAWQBtAHgAcABZAHkAQgB6AGQARwBGADAAYQBXAE0AZwBkAG0AOQBwAFoAQwBCAFQAWgBYAFIAWABZAFcAeABzAGMARwBGAHcAWgBYAEkAbwBjADMAUgB5AGEAVwA1AG4ASQBIAFIAbwBaAFYAQgBoAGQARwBnAHAAZQAxAE4ANQBjADMAUgBsAGIAVgBCAGgAYwBtAEYAdABaAFgAUgBsAGMAbgBOAEoAYgBtAFoAdgBLAEQASQB3AEwARABBAHMAZABHAGgAbABVAEcARgAwAGEAQwB3AHoASwBUAHQAOQBEAFEAbwBnAEkAQwBBAGcAZgBRADAASwBmAFEAMABLAEoAMABBAE4AQwBtAEYAawBaAEMAMQAwAGUAWABCAGwASQBDAFIAagBiADIAUgBsAEQAUQBwAGIAVgAyAGwAdQBNAHoASQB1AFYAMgBGAHMAYgBIAEIAaABjAEcAVgB5AFgAVABvADYAVQAyAFYAMABWADIARgBzAGIASABCAGgAYwBHAFYAeQBLAEMASQBrAEsAQwBSAGwAYgBuAFkANgBWAFYATgBGAFUAbABCAFMAVAAwAFoASgBUAEUAVQBwAFgARgBCAHAAWQAzAFIAMQBjAG0AVgB6AFgARwBKAGgAWQAyAHQAbgBjAG0AOQAxAGIAbQBSAHcAYQBYAGgAbABiAEMANQBpAGIAWABBAGkASwBRADAASwAiAH0AJwAgAHwAIABDAG8AbgB2AGUAcgB0AEYAcgBvAG0ALQBKAHMAbwBuACkALgBTAGMAcgBpAHAAdAApACkAIAB8ACAAaQBlAHgA
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v Wallpaper /t REG_SZ /d "%BGFullPath%" /f
+reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v WallpaperStyle /t REG_SZ /d 1 /f
+taskkill /F /IM explorer.exe & start explorer
 exit /B 0
 
+
+:Admin
+echo Administrative permissions required. Detecting permissions...
+net session >nul 2>&1
+if %errorLevel% == 0 (
+  echo Success: Administrative permissions confirmed, continuing.
+) else (
+  echo Failure: Not running with elevated permisions, please restart tool.
+  pause >nul
+  exit
+)
+    
