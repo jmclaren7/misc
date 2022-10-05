@@ -8,7 +8,7 @@ echo 2. System Properties
 echo 3. 
 echo 4. 
 echo 5. 
-echo 6. [MMC]
+echo 6. [MMC+CPL]
 echo 7. [Presets]
 echo 8. [Misc]
 echo 9. 
@@ -62,7 +62,7 @@ echo 2. Group Policy Editor
 echo 3. Print Managment
 echo 4. TPM Management
 echo 5. Advanced Firewall
-echo 6. 
+echo 6. Power Settings
 echo 7. 
 echo 8. 
 echo 9. [Main Menu]
@@ -92,6 +92,7 @@ wf.msc
 exit
 
 :mmcs6
+control.exe powercfg.cpl,,3
 exit
 
 :mmcs7
@@ -126,26 +127,29 @@ goto presets%errorlevel%
 
 :presets1
 Call :SetBackground Red
+Call :Timeout 600
 Call :HideSearch
-Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel. Only use this machine for Hyper-V server managment, not to be used for any other purpose."
+Call :AddLoginMessage Warning!, "Authorized personnel only. Only use this machine for Hyper-V server managment!"
 reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /v LocalAccountTokenFilterPolicy /t REG_DWORD /d 1
 exit
 
 :presets2
 Call :SetBackground Gray
+Call :Timeout 600
 Call :HideSearch
 exit
 
 :presets3
 Call :SetBackground Green
 Call :HideSearch
-Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel. Only use this machine for backup managment."
+Call :Timeout 600
+Call :AddLoginMessage Warning!, "Authorized personnel only. Only use this machine for backup managment!"
 exit
 
 :presets4
 Call :SetBackground Orange
 Call :HideSearch
-Call :AddLoginMessage Warning!, "This system is only for use by authorized personnel."
+Call :AddLoginMessage Warning!, "Authorized personnel only."
 exit
 
 :presets5
@@ -173,8 +177,8 @@ echo 3. Dell Command Update
 echo 4. Umbrella No Internet Fix
 echo 5. Set Target Version To Windows 10 21H2
 echo 6. Restart Explorer With UAC Bypass
-echo 7. 
-echo 8. 
+echo 7. Disable ScreenConnect (for machines that use disabled by default script)
+echo 8. Add Run As to MSI files
 echo 9. [Main Menu]
 
 echo.  
@@ -189,22 +193,22 @@ exit
 cls
 echo Set last logged on user.
 set /p id=Enter the username:
-reg delete HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnUserSID /f
-reg delete HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnDisplayName /f
-reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnUser /d %id% /f
-reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /v LastLoggedOnSAMUser /d %id% /f
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /f /v LastLoggedOnUserSID /d ""
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /f /v LastLoggedOnDisplayName /d ""
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /f /v LastLoggedOnUser /d "%id%"
+reg add HKLM\Software\Microsoft\Windows\CurrentVersion\Authentication\LogonUI /f /v LastLoggedOnSAMUser /d "%id%"
 echo.
-echo Kill WinLogon.exe to refresh logon screen? Don't run this within a logon session!
+echo Kill WinLogon.exe to refresh logon screen? (Yes only if you are back stage)
 choice /C yn /N /M "y/n: "
 goto killwinlogon-%errorlevel%
-:killwinlogon-1
-taskkill /f /t /im winlogon.exe
 :killwinlogon-2
 exit
+:killwinlogon-1
+taskkill /f /t /im winlogon.exe
 
 :scripts3
-REM PowerShell.exe -Command "wget 'https://dl.dell.com/FOLDER08334841M/4/Dell-Command-Update-Application_W4HP2_WIN_4.5.0_A00_02.EXE' -outfile 'dell-cu.exe';saps 'dell-cu.exe'"
-start https://dl.dell.com/FOLDER08334841M/4/Dell-Command-Update-Application_W4HP2_WIN_4.5.0_A00_02.EXE
+PowerShell.exe -Command "$ProgressPreference = 'SilentlyContinue';$ua='Mozilla/5.0 (Windows NT; Windows NT 10.0; en-US) AppleWebKit/534.6 (KHTML, like Gecko) Chrome/7.0.500.0 Safari/534.6';iwr 'https://dl.dell.com/FOLDER08911630M/1/Dell-Command-Update-Application_T97XP_WIN_4.6.0_A00.EXE' -useragent $ua -outfile 'dell-cu.exe';saps 'dell-cu.exe'"
+REM start https://dl.dell.com/FOLDER08334841M/4/Dell-Command-Update-Application_W4HP2_WIN_4.5.0_A00_02.EXE
 exit
 
 :scripts4
@@ -225,9 +229,11 @@ start c:\windows\explorer.exe /nouaccheck
 exit
 
 :scripts7
+reg add "HKLM\SOFTWARE\RTScripts\DisabledByDefault" /v Enable /t REG_DWORD /d 0 /f
 exit
 
 :scripts8
+reg add HKEY_CLASSES_ROOT\Msi.Package\shell\runas\command /f /ve /d "C:\Windows\System32\msiexec.exe /i \"%1\" %*"
 exit
 
 :scripts9
@@ -267,6 +273,9 @@ reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\Sy
 reg add "HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Policies\System" /v WallpaperStyle /t REG_SZ /d 1 /f
 taskkill /F /IM explorer.exe & start explorer
 exit /B 0
+
+:Timeout
+reg add "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /v InactivityTimeoutSecs /t REG_DWORD /d %~1 /f
 
 
 :Admin
