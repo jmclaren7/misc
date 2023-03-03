@@ -1,30 +1,41 @@
-$Days = 90
+$Days = 60
 $Date = (Get-Date).Adddays(-($Days))
 
-$Computers = (Get-ADComputer -Filter *).count
-$ComputersInactive = (Get-ADComputer -Filter {LastLogonDate -lt $Date} -Properties LastLogonDate | Measure-Object).count
-$ComputersWorkstations = (Get-ADComputer -Filter {OperatingSystem -notlike '*server*'} -Properties OperatingSystem).count
-$ComputersServers = (Get-ADComputer -Filter {OperatingSystem -like '*server*'} -Properties OperatingSystem).count
-$UsersEnabled = (Get-ADUser -Filter {Enabled -eq $true}).count
-$UsersActive = (Get-ADUser -Properties lastlogondate -Filter { (Enabled -eq $true) -and (LastLogonTimeStamp -ge $Date) }).count
-$UsersInactive = (Get-ADUser -Properties LastLogonDate -Filter { (Enabled -eq $true) -and (LastLogonTimeStamp -lt $Date) -or (Enabled -eq $true) -and (LastLogonDate -notlike '*')}).count
-$UsersDisabled = (Get-ADUser -Filter {Enabled -eq $false}).count
+$Computers = Get-ADComputer -Filter * -Properties OperatingSystem,LastLogonDate
+$ComputersEnabled = $Computers | Where-Object {$_.Enabled -eq $true}
+$ComputersDisabled = $Computers | Where-Object {$_.Enabled -eq $false}
+$ComputersActive = $ComputersEnabled | Where-Object {$_.LastLogonDate -ge $Date}
+$ComputersInactive = $ComputersEnabled | Where-Object {($_.LastLogonDate -lt $Date) -or ($_.LastLogonDate -notlike '*')}
+$ComputersServers = $ComputersEnabled | Where-Object {$_.OperatingSystem -like '*server*'}
+$ComputersWorkstations = $ComputersEnabled | Where-Object {$_.OperatingSystem -notlike '*server*'}
+
+$Users = Get-ADUser -Filter * -Properties LastLogonDate
+$UsersEnabled = $Users | Where-Object {$_.Enabled -eq $true}
+$UsersDisabled = $Users | Where-Object {$_.Enabled -eq $false}
+$UsersActive = $UsersEnabled | Where-Object {$_.LastLogonDate -ge $Date}
+$UsersInactive = $UsersEnabled | Where-Object {($_.LastLogonDate -lt $Date) -or ($_.LastLogonDate -notlike '*')}
+
 
 Write-Host " "
 Write-Host "==============================================================================="
-Write-Host "Computers.........."$Computers
-Write-Host "    Inactive (90).."$ComputersInactive
-Write-Host "    Workstations..."$ComputersWorkstations
-Write-Host "    Servers........"$ComputersServers
-Write-Host "Users Enabled......"$UsersEnabled
-Write-Host "    Active (90)...."$UsersActive
-Write-Host "    Inactive (90).."$UsersInactive
-Write-Host "Users Disabled....."$UsersDisabled
+Write-Host "Activity Is Based On Last $Days Days"
+Write-Host "Computers"
+Write-Host "  Enabled......... $($ComputersEnabled.count)"
+Write-Host "    Active........ $($ComputersActive.count)"
+Write-Host "    Inactive...... $($ComputersInactive.count)"
+Write-Host "    Workstations.. $($ComputersWorkstations.count)"
+Write-Host "    Servers....... $($ComputersServers.count)"
+Write-Host "  Disabled........ $($ComputersDisabled.count)"
+Write-Host "Users"
+Write-Host "  Enabled......... $($UsersEnabled.count)"
+Write-Host "    Active........ $($UsersActive.count)"
+Write-Host "    Inactive...... $($UsersInactive.count)"
+Write-Host "  Disabled.........$($UsersDisabled.count)"
 Write-Host " "
-Write-Host "======= Inactive Users (Last 90 Days) ======="
-Get-ADUser -Properties LastLogonDate -Filter { (Enabled -eq $true) -and (LastLogonTimeStamp -lt $Date) -or (Enabled -eq $true) -and (LastLogonDate -notlike '*')} | Format-Table Name, UserPrincipalName, LastLogonDate
-Write-Host "======= Inactive Computers (Last 90 Days) ======="
-Get-ADComputer -Filter {LastLogonDate -lt $Date} -Properties OperatingSystem, LastLogonDate | Format-Table Name, OperatingSystem, LastLogonDate
+Write-Host "======== Inactive Computers ==================================================="
+$ComputersInactive | Format-Table Name, OperatingSystem, LastLogonDate
+Write-Host "======== Inactive Users ======================================================="
+$UsersInactive | Format-Table Name, UserPrincipalName, LastLogonDate
 Write-Host "==============================================================================="
 Write-Host " "
-Read-Host -Prompt "Press enter to continue"
+#Read-Host -Prompt "Press enter to continue"
