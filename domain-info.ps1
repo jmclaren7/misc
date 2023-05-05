@@ -1,7 +1,7 @@
 $Days = 60
 $Date = (Get-Date).Adddays(-($Days))
 
-$Computers = Get-ADComputer -Filter * -Properties OperatingSystem,LastLogonDate
+$Computers = Get-ADComputer -Filter * -Properties OperatingSystem,LastLogonDate | Sort Name
 $ComputersEnabled = $Computers | Where-Object {$_.Enabled -eq $true}
 $ComputersDisabled = $Computers | Where-Object {$_.Enabled -eq $false}
 $ComputersActive = $ComputersEnabled | Where-Object {$_.LastLogonDate -ge $Date}
@@ -9,7 +9,7 @@ $ComputersInactive = $ComputersEnabled | Where-Object {($_.LastLogonDate -lt $Da
 $ComputersServers = $ComputersEnabled | Where-Object {$_.OperatingSystem -like '*server*'}
 $ComputersWorkstations = $ComputersEnabled | Where-Object {$_.OperatingSystem -notlike '*server*'}
 
-$Users = Get-ADUser -Filter * -Properties LastLogonDate
+$Users = Get-ADUser -Filter * -Properties LastLogonDate | Sort Name
 $UsersEnabled = $Users | Where-Object {$_.Enabled -eq $true}
 $UsersDisabled = $Users | Where-Object {$_.Enabled -eq $false}
 $UsersActive = $UsersEnabled | Where-Object {$_.LastLogonDate -ge $Date}
