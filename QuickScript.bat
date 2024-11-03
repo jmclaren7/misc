@@ -1,4 +1,8 @@
 @echo off
+REM This is script combines a number of useful commands into one multiple choice menu.
+REM Useful when combined with the tool box feature of some remote access tools like ScreenConnect.
+REM https://github.com/jmclaren7/misc/blob/master/QuickScript.bat
+
 REM ================================================================
 :option
 cls
@@ -6,7 +10,7 @@ echo.
 echo Hostname: %computername% 
 echo User: %userdomain%\%username%
 Call :AdminInfo
-powershell -Command "\"{0:\U\p\t\i\m\e\:\ d\d\ hh\:mm\:ss}\" -f (New-TimeSpan -Start (Get-CimInstance -ClassName Win32_OperatingSystem).LastBootUpTime -End (Get-Date))"
+Call :Uptime
 echo.
 echo  1. Computer Management   Q. Set Timezone Eastern  A. Disable Fast Startup Using Registry
 echo  2. System Properties     W. Edit Hosts File       S. Domain Information (PS Download)
@@ -293,6 +297,47 @@ exit /B 0
 :Timeout
 reg add "HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System" /f /v InactivityTimeoutSecs /t REG_DWORD /d %~1
 
+:Uptime
+setlocal enabledelayedexpansion
+
+for /f "skip=1" %%i in ('wmic path win32_operatingsystem get lastbootuptime') do (
+  set "boottime=%%i"
+  goto :break
+)
+:break
+
+set "boot_year=%boottime:~0,4%"
+set "boot_month=%boottime:~4,2%"
+set "boot_day=%boottime:~6,2%"
+set "boot_hour=%boottime:~8,2%"
+set "boot_minute=%boottime:~10,2%"
+set "boot_second=%boottime:~12,2%"
+
+for /f "tokens=2 delims==" %%a in ('wmic os get localdatetime /value') do set "datetime=%%a"
+set "current_year=%datetime:~0,4%"
+set "current_month=%datetime:~4,2%"
+set "current_day=%datetime:~6,2%"
+set "current_hour=%datetime:~8,2%"
+set "current_minute=%datetime:~10,2%"
+set "current_second=%datetime:~12,2%"
+
+set /a boot_seconds=(boot_year*31536000 + boot_month*2592000 + boot_day*86400 + boot_hour*3600 + boot_minute*60 + boot_second)
+set /a current_seconds=(current_year*31536000 + current_month*2592000 + current_day*86400 + current_hour*3600 + current_minute*60 + current_second)
+set /a diff_seconds=current_seconds - boot_seconds
+
+set /a uptime_days=diff_seconds / 86400
+set /a uptime_hours=(diff_seconds %% 86400) / 3600
+set /a uptime_minutes=(diff_seconds %% 3600) / 60
+set /a uptime_seconds=diff_seconds %% 60
+
+REM If uptime_days is greater than 7, echo the uptime with bold orange text
+if %uptime_days% gtr 7 (
+  echo Uptime: [93m%uptime_days%d %uptime_hours%h %uptime_minutes%m %uptime_seconds%s[0m
+) else (
+  echo Uptime: %uptime_days%d %uptime_hours%h %uptime_minutes%m %uptime_seconds%s
+)
+endlocal
+exit /B 1
 
 :Admin
 echo Administrative permissions required. Detecting permissions...
@@ -304,6 +349,7 @@ if %errorLevel% == 0 (
   echo Failure: Not running with elevated permisions, please restart tool.
   exit 0
 )
+
 :AdminInfo
 net session >nul 2>&1
 if %errorLevel% == 0 (
@@ -314,4 +360,3 @@ if %errorLevel% == 0 (
   echo Running Elevated: [91mNo[0m
   exit /B 0
 )
-    
