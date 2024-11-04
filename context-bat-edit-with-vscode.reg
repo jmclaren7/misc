@@ -1,0 +1,7 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\batfile\shell\Edit with VSCode]
+@="Edit with VSCode"
+
+[HKEY_CLASSES_ROOT\batfile\shell\Edit with VSCode\command]
+@="\"C:\\Program Files\\Microsoft VS Code\\Code.exe\" \"%1\""
