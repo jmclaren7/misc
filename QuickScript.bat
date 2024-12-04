@@ -11,6 +11,8 @@ echo Hostname: %computername%
 echo User: %userdomain%\%username%
 Call :AdminInfo
 Call :Uptime
+REM Get Windows version and update targeting information
+powershell -command "$p = Get-Item 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'; $v = Get-Item 'HKLM:SOFTWARE\Microsoft\Windows NT\CurrentVersion'; 'OS: ' + ((Get-WmiObject Win32_OperatingSystem).Caption -replace 'Microsoft ','') + ' ' + $v.GetValue('DisplayVersion') + '  ' + $(if($p.GetValue('TargetReleaseVersion')){'(Targeting: ' + [string]$p.GetValue('ProductVersion') + ' ' + [string]$p.GetValue('TargetReleaseVersionInfo') + ')'})"
 echo.
 echo  1. Computer Management   Q. Set Timezone Eastern  A. Disable Fast Startup Using Registry
 echo  2. System Properties     W. Edit Hosts File       S. Domain Information (PS Download)
