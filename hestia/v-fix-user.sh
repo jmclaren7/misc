@@ -1,19 +1,19 @@
 #!/bin/bash
 
-USER=$1
-OLDIP=$2
-OLDHOST=$3
+USER=$3
+OLDIP=$1
+OLDHOST=$2
 
 if [ ! -z $2 ]
 then
 echo "Updating DNS IPs"
-sed -i "s/$OLDIP/`hostname -i`/g" /usr/local/vesta/data/users/$USER/dns/*.conf
+sed -i "s/$OLDIP/`hostname -i`/g" /usr/local/hestia/data/users/$USER/dns/*.conf
 fi
 
 if [ ! -z $3 ] 
 then
 echo "Updating DNS Host Names"
-sed -i "s/$OLDHOST/`hostname -f`/g" /usr/local/vesta/data/users/$USER/dns/*.conf
+sed -i "s/$OLDHOST/`hostname -f`/g" /usr/local/hestia/data/users/$USER/dns/*.conf
 fi
 
 echo "Updating SOAs"

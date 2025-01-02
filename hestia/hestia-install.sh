@@ -11,7 +11,7 @@ mkswap /swapfile
 swapon /swapfile
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
-#still need to set swappiness and pressure 
+# Set swappiness and pressure 
 sysctl vm.swappiness=10
 echo "vm.swappiness=10" >> /etc/sysctl.conf
 

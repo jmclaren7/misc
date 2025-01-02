@@ -1,8 +1,8 @@
 #!/bin/bash
-# info: rebuild all assets for all users
+# info: rebuild system users
 # options: [RESTART]
 #
-# example: v-rebuild-all-users
+# example: v-rebuild-users
 #
 # This function rebuilds all assets for all users.
 
