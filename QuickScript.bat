@@ -22,7 +22,8 @@ echo  6. Print Control Panel   Y.                       H. Restart Explorer With
 echo  7. Group Policy Editor   U. VM Hosts Preset       J. Enable SMBv1 and reboot
 echo  8. TPM Management        I. Veeam Preset          K. Add Run As to MSI files
 echo  9. Advanced Firewall     O. Other Servers Preset  L. Target Windows 11 24H2
-echo  0. Power Settings        P. Tech Machine Preset
+echo  0. Power Settings        P. Tech Machine Preset   Z. Target Windows 11 23H2
+echo                                                    X. Remove Version Targeting
 echo.
 choice /C 1234567890abcdefghijklmnopqrstuvwxyz /N
 goto option%errorlevel%
@@ -219,6 +220,9 @@ exit
 
 :: X 
 :option34
+reg delete HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v TargetReleaseVersion
+reg delete HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v ProductVersion
+reg delete HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v TargetReleaseVersionInfo
 exit
 
 :: Y 
@@ -227,6 +231,9 @@ exit
 
 :: Z 
 :option36
+reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v TargetReleaseVersion /t REG_DWORD /d 00000001
+reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v ProductVersion /d "Windows 11"
+reg add HKLM\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate /f /v TargetReleaseVersionInfo /d "23H2" 
 exit
 
 
